@@ -647,7 +647,7 @@ class _MaterialControlsState extends State<MaterialControls>
 
     // display the progress bar indicator only after the buffering delay if it has been set
     if (chewieController.progressIndicatorDelay != null) {
-      if (controller.value.isBuffering) {
+      if (_isBuffering) {
         _bufferingDisplayTimer ??= Timer(
           chewieController.progressIndicatorDelay!,
           _bufferingTimerTimeout,
@@ -658,13 +658,25 @@ class _MaterialControlsState extends State<MaterialControls>
         _displayBufferingIndicator = false;
       }
     } else {
-      _displayBufferingIndicator = controller.value.isBuffering;
+      _displayBufferingIndicator = _isBuffering;
     }
 
     setState(() {
       _latestValue = controller.value;
       _subtitlesPosition = controller.value.position;
     });
+  }
+
+  bool get _isBuffering {
+    try {
+      final value = controller.value;
+      final buffer = value.buffered.lastOrNull?.end.inMilliseconds;
+      final position = value.position.inMilliseconds;
+
+      return position == buffer;
+    } catch (_) {}
+
+    return false;
   }
 
   Widget _buildProgressBar() {
